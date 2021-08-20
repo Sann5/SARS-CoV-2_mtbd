@@ -1,0 +1,52 @@
+---
+title: "Estimating age specific effective reproductives number for Switzerlan"
+author: "Santiago M. Castro Dau"
+date: "Bayesian Phylodynamics, Spring 2021, Final Project"
+output: pdf_document
+bibliography: ../data/bibliography.bib
+---
+
+```{r setup, include=FALSE}
+## Set chunk settings
+knitr::opts_chunk$set(echo = FALSE, 
+                      message=FALSE, 
+                      warning = FALSE)
+```
+
+## Introduction
+Herd immunity is achived against a disease when a big enough portion of the suceptible population becomes inmune to the disease, therby hindering the flow of the diseas through the population. 
+
+The aim of the project is to answer the following question: would the percentage of people that are needed to be vaccinated to aquire heard inmunity be different if heterogeneus risk structure (HRS) is taken into account. The effective reproductive number ($R_e$) of a heterogenous population is given by the a weighted sum of the class specific effective reproductive numbers (shown for three different risk classes below). 
+
+Weighted sum of the effective reproductive numbers and the expression for the weights:
+$$
+R_e^T = \alpha_1 R_e^1 + \alpha_2 R_e^2 + \alpha_3 R_e^3 \\
+\alpha_i = \frac{x_i}{x_1 + x_2 + x_3}
+$$
+
+Dominatig eigenvector:
+$$ 
+v_1 = 
+\begin{bmatrix}
+x_1 \\
+x_2 \\
+x_3 
+\end{bmatrix}
+$$
+
+The weights in this sum are determined by the dominating eigenvector of the Jacobian matrix of a chosen model. This model is a system of ODE's which descibes the dynamics of the disease. Choosing a model, parametrizing it, and using such parameters to obtain the eigen decomposition of the systems matrix is beyond the scope of the curretn project so instead we will make some simplifying assumptions that will allow us to give an answer to our question. We will take the over all $R_e$ to be the average of the class specific $R_e$'s. This is equivalent to assuming that all infected classes are growing or shrinking at the same rate (in the long term and given that all conditions remain the same). This assumtion is very likely to be false, but hopefully its close enough to reality so we can still get some interesting results. 
+
+Simplified expression:
+$$
+R_e^T = \frac{1}{3} (R_e^1 + R_e^2 + R_e^3)
+$$
+
+On the other hand we knoe that the effective reproductive number of a vaccinated population is simply the the orginal effective reproductive number times the fraction of suceptibles left after vaccination.
+
+$$
+R{_e{_V}}^i = R_e^i (1 - p^i * E)
+$$
+
+Where $p$ is the fraction of vaccinated people in that speciifc class relative to the entire population times the efficacy of the vaccine $E$. We will assume $E$ to be equal to 0.95 (the reported full vaccination efficacy of the Moderna and Pizer) and we will play around with different values of $p^i$ in the end to analyze the proprotion of each sub population that should be vaccinated to bring the $R_e^T$ to a value below 1. 
+
+Then the only things left to find out to carry out this analysis is the $R_e^i$ for each class. We will estimate this using BEAST2 and the sequence data from the GISAID data set for Switzerland samples from the 15th of November 2020 to the 17th of January 2021. We choose this period because restircitons were kept more or less the same (a new restriction period started on the 6th of November but in order to filter out infection from before this restiction period we pushed the window 9 days) and therefore the effect of restirctions in the birth and death rate estimates is minimized (Oxford Stringency Index of 55 from the 6th of November to the 21st of dicember 2020 and 68 until the 17th of January according to Swiss National Covid-19 Science Task Force [dashboard](https://sciencetaskforce.ch/en/current-situation/)). Also very importantly, this period is prior to the start of the vaccination campaign so we can observe the dynamics of the disease without the effect of this intervantion.
